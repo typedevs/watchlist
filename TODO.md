@@ -1,0 +1,4 @@
+- Update README.md
+- Provide seed data
+- Use postgres as a database instead of a runtime list
+- Some improvements (constant urls, ...)
