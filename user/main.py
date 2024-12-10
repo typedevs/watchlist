@@ -12,13 +12,13 @@ class User(BaseModel):
 users: list[User] = []
 
 
-@app.post("/user/")
+@app.post("/")
 async def create_user(user: User):
     users.append(user)
     return user
 
 
-@app.get("/user/{user_id}")
+@app.get("/{user_id}")
 async def get_user(user_id: int):
     for user in users:
         if user.id == user_id:
@@ -26,7 +26,7 @@ async def get_user(user_id: int):
     return {"error": "User not found"}
 
 
-@app.get("/user/{user_id}/watchlist")
+@app.get("/{user_id}/watchlist")
 async def get_user_watchlist(user_id: int):
     # Call watchlist microservice to get watchlist
     import requests

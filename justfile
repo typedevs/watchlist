@@ -11,3 +11,6 @@ deps:
     -r user/requirements.txt \
     -r watchlist/requirements.txt \
     -r director/requirements.txt
+
+db:
+    sh ./populate_db.sh

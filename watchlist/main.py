@@ -13,13 +13,13 @@ class Watchlist(BaseModel):
 watchlists: list[Watchlist] = []
 
 
-@app.post("/watchlist/")
+@app.post("/")
 async def create_watchlist(watchlist: Watchlist):
     watchlists.append(watchlist)
     return watchlist
 
 
-@app.delete("/watchlist/{watchlist_id}")
+@app.delete("/{watchlist_id}")
 async def delete_watchlist(watchlist_id: int):
     for watchlist in watchlists:
         if watchlist.id == watchlist_id:
@@ -28,7 +28,7 @@ async def delete_watchlist(watchlist_id: int):
     return {"error": "Watchlist not found"}
 
 
-@app.get("/watchlist/{user_id}")
+@app.get("/{user_id}")
 async def get_watchlist(user_id: int):
     watchlist_movies: list[dict[str, str]] = []
     for watchlist in watchlists:

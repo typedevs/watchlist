@@ -12,13 +12,13 @@ class Director(BaseModel):
 directors: list[Director] = []
 
 
-@app.post("/director/")
+@app.post("/")
 async def create_director(director: Director):
     directors.append(director)
     return director
 
 
-@app.delete("/director/{director_id}")
+@app.delete("/{director_id}")
 async def delete_director(director_id: int):
     for director in directors:
         if director.id == director_id:

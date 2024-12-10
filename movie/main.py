@@ -13,13 +13,13 @@ class Movie(BaseModel):
 movies: list[Movie] = []
 
 
-@app.post("/movie/")
+@app.post("/")
 async def create_movie(movie: Movie):
     movies.append(movie)
     return movie
 
 
-@app.get("/movie/{movie_id}")
+@app.get("/{movie_id}")
 async def get_movie(movie_id: int):
     for movie in movies:
         if movie.id == movie_id:
@@ -27,7 +27,7 @@ async def get_movie(movie_id: int):
     return {"error": "Movie not found"}
 
 
-@app.delete("/movie/{movie_id}")
+@app.delete("/{movie_id}")
 async def delete_movie(movie_id: int):
     for movie in movies:
         if movie.id == movie_id:
