@@ -1,3 +1,0 @@
-- Implement onion layer
-- Use postgres as a database instead of a runtime list
-- Some improvements (constant urls, ...)
