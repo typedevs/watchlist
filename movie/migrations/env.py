@@ -10,12 +10,12 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from movie.src.infrastructures.database.models.base import Base
-from movie.src.infrastructures.database.session import DATABASE_URL
+from movie.src.core.config import settings
+from movie.src.infrastructures.database.sql_models.base import Base
 
 
 config = context.config
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.full_database_url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

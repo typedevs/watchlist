@@ -1,11 +1,11 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
-from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter
+from dependency_injector.wiring import inject
 
 from movie.src.adapters.controllers.movie_controller import MovieController
 from movie.src.adapters.schemas.movie_schema import MovieCreateRequest, MovieResponse
-from movie.src.core.containers import AppContainer
+from movie.src.core.dependency_injection import injector
 
 router = APIRouter(
     prefix="/movie",
@@ -14,10 +14,8 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[MovieResponse])
-@inject
-async def get_movies(
-        controller: MovieController = Depends(Provide[AppContainer.movie_controller]),
-):
+async def get_movies():
+    controller = injector.get(MovieController)
     return await controller.get_movies()
 
 
@@ -25,8 +23,8 @@ async def get_movies(
 @inject
 async def get_movie(
         movie_id: int,
-        controller: MovieController = Depends(Provide[AppContainer.movie_controller]),
 ):
+    controller = injector.get(MovieController)
     return await controller.get_movie(movie_id)
 
 
@@ -34,8 +32,8 @@ async def get_movie(
 @inject
 async def create_movie(
         movie: MovieCreateRequest,
-        controller: MovieController = Depends(Provide[AppContainer.movie_controller]),
 ):
+    controller = injector.get(MovieController)
     return await controller.create_movie(movie)
 
 
@@ -43,6 +41,6 @@ async def create_movie(
 @inject
 async def delete_movie(
         movie_id: int,
-        controller: MovieController = Depends(Provide[AppContainer.movie_controller]),
 ):
+    controller = injector.get(MovieController)
     return await controller.remove_movie(movie_id)
