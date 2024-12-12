@@ -10,7 +10,7 @@ class MovieUnitOfWork(UnitOfWork):
         self._session = session
 
     async def __aenter__(self):
-        self.transaction = await self._session.begin()
+        await self._session.begin()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -24,5 +24,5 @@ class MovieUnitOfWork(UnitOfWork):
             await self.remove()
 
     async def remove(self):
-        from movie.app.infrastructures.database.session import async_session
+        from movie.src.infrastructures.database.session import async_session
         await async_session.remove()

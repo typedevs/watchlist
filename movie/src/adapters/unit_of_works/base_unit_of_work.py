@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from movie.app.adapters.repositories.base_repository import Repository
+from movie.src.adapters.repositories.base_repository import Repository
 
 
 class UnitOfWork(ABC):

@@ -1,8 +1,14 @@
 from fastapi import FastAPI
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
-from src.core.containers import AppContainer
-from src.infrastructures.fastapi.api.routes import routers
-
+from movie.src.core.containers import AppContainer
+from movie.src.infrastructures.fastapi.api.routes import routers
+from opentelemetry import trace
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor, BatchSpanProcessor
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 app = FastAPI()
 
 container = AppContainer()
@@ -10,40 +16,13 @@ app.container = container
 
 app.include_router(routers)
 
+resource = Resource(attributes={
+    SERVICE_NAME: "fs-app"
+})
+traceProvider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+traceProvider.add_span_processor(processor)
+trace.set_tracer_provider(traceProvider)
 
-# from fastapi import Fast;API
-# from pydantic import BaseModel
-#
-# app = FastAPI()
-#
-#
-# class Movie(BaseModel):
-#     id: int
-#     name: str
-#     director_id: int
-#
-#
-# movies: list[Movie] = []
-#
-#
-# @app.post("/")
-# async def create_movie(movie: Movie):
-#     movies.append(movie)
-#     return movie
-#
-#
-# @app.get("/{movie_id}")
-# async def get_movie(movie_id: int):
-#     for movie in movies:
-#         if movie.id == movie_id:
-#             return movie
-#     return {"error": "Movie not found"}
-#
-#
-# @app.delete("/{movie_id}")
-# async def delete_movie(movie_id: int):
-#     for movie in movies:
-#         if movie.id == movie_id:
-#             movies.remove(movie)
-#             return {"message": "Movie deleted"}
-#     return {"error": "Movie not found"}
+FastAPIInstrumentor.instrument_app(app)
+HTTPXClientInstrumentor().instrument()

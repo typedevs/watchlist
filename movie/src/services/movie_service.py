@@ -1,3 +1,5 @@
+from typing import List
+
 from dependency_injector.wiring import inject
 
 from movie.src.adapters.schemas.movie_schema import MovieCreateRequest
@@ -7,7 +9,6 @@ from movie.src.services.base_service import Service
 
 
 class MovieService(Service[MovieEntity]):
-    @inject
     def __init__(self, movie_uow: MovieUnitOfWork):
         self.movie_uow = movie_uow
 
@@ -21,9 +22,9 @@ class MovieService(Service[MovieEntity]):
         async with self.movie_uow as uow:
             return await uow.repository.get(entity_id=movie_id)
 
-    async def get_list(self):
+    async def get_list(self) -> List[MovieEntity]:
         async with self.movie_uow as uow:
-            return await uow.repository.list()
+            return await uow.repository.get_multi()
 
     async def delete(self, movie_id: int):
         async with self.movie_uow as uow:

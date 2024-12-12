@@ -2,9 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
     async_sessionmaker
 from asyncio import current_task
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost/movie"
+from movie.src.core.config import settings
 
-async_engine: AsyncEngine = create_async_engine(DATABASE_URL, future=True, echo=True)
+
+async_engine: AsyncEngine = create_async_engine(settings.full_database_url, future=True, echo=True)
 
 
 async_session = async_scoped_session(

@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from typing import Optional, List
 
 from movie.src.adapters.repositories.base_repository import Repository
+from movie.src.core.exceptions import MovieNotFoundException
 from movie.src.entities.movie_entity import MovieEntity
 from movie.src.infrastructures.database.models.movie_model import MovieModel
 
@@ -34,3 +35,5 @@ class MovieRepository(Repository[MovieEntity]):
         db_movie = result.scalar_one_or_none()
         if db_movie:
             await self.session.delete(db_movie)
+        else:
+            raise MovieNotFoundException
