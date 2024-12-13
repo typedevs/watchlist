@@ -1,17 +1,12 @@
-# from httpx import AsyncClient
-# from sqlalchemy import select
-# from sqlalchemy.ext.asyncio import AsyncSession
-# import pytest
-#
-# from movie.src.infrastructures.database.sql_models import MovieModel
-#
-# pytestmark = pytest.mark.asyncio
-#
-#
-# async def test_get_movie(async_client: AsyncClient, async_db: AsyncSession,
-#                            async_example_orm) -> None:
-#     response = await async_client.get(f'/movie/{async_example_orm.id}')
-#
-#     assert response.status_code == 200
-#     assert (await async_db.execute(select(MovieModel).filter_by(id=async_example_orm.id)
-#                                    )).scalar_one().id == async_example_orm.id
+import pytest
+import requests
+
+
+@pytest.mark.usefixtures("postgres_db")
+def test_create_movie_api():
+    url = "http://127.0.0.1:8002"
+    r = requests.post(
+        f"{url}/movie", json={"name": "interstellar", "director_id": 12}
+    )
+    assert r.status_code == 200
+    assert r.json().get("name") == "interstellar"
