@@ -35,13 +35,13 @@ app.include_router(routers)
 async def universal_exception_handler(_, exc):
     return JSONResponse(content={'error': f'{type(exc).__name__}: {exc}'}, status_code=500)
 
-# resource = Resource(attributes={
-#     SERVICE_NAME: "fs-app"
-# })
-# traceProvider = TracerProvider(resource=resource)
-# processor = BatchSpanProcessor(ConsoleSpanExporter())
-# traceProvider.add_span_processor(processor)
-# trace.set_tracer_provider(traceProvider)
-#
-# FastAPIInstrumentor.instrument_app(app)
-# HTTPXClientInstrumentor().instrument()
+resource = Resource(attributes={
+    SERVICE_NAME: "fs-app"
+})
+traceProvider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+traceProvider.add_span_processor(processor)
+trace.set_tracer_provider(traceProvider)
+
+FastAPIInstrumentor.instrument_app(app)
+HTTPXClientInstrumentor().instrument()
