@@ -5,38 +5,44 @@ services:
     build: ./movie
     volumes:
       - ./movie:/app/movie
+    depends_on:
+      - db
     ports:
       - "9001:8001"
-  director:
-    build: ./director
+#  director:
+#    build: ./director
+#    volumes:
+#      - ./dirctor:/app/director
+#    ports:
+#      - "9002:8002"
+#  watchlist:
+#    build: ./watchlist
+#    volumes:
+#      - ./watchlist:/app/watchlist
+#    ports:
+#      - "9003:8003"
+#    depends_on:
+#      - movie
+#      - director
+#  user:
+#    build: ./user
+#    volumes:
+#      - ./user:/app/user
+#    ports:
+#      - "9004:8004"
+#    depends_on:
+#      - watchlist
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
     volumes:
-      - ./dirctor:/app/director
+      - db-data:/var/lib/postgresql/data
     ports:
-      - "9002:8002"
-  watchlist:
-    build: ./watchlist
-    volumes:
-      - ./watchlist:/app/watchlist
-    ports:
-      - "9003:8003"
-    depends_on:
-      - movie
-      - director
-  user:
-    build: ./user
-    volumes:
-      - ./user:/app/user
-    ports:
-      - "9004:8004"
-    depends_on:
-      - watchlist
-#   db:
-#     image: postgres
-#     environment:
-#       - POSTGRES_USER=postgres
-#       - POSTGRES_PASSWORD=postgres
-#     volumes:
-#       - db-data:/var/lib/postgresql/data
-#
-# volumes:
-#   db-data:
+      - "5432:5432"
+volumes:
+   db-data:
