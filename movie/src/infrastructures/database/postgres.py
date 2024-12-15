@@ -7,7 +7,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 from movie.src.core.config import settings
 
-AsyncPostgreSQLEngine: AsyncEngine = create_async_engine(settings.full_database_url, future=True,
+AsyncPostgreSQLEngine: AsyncEngine = create_async_engine(settings.DATABASE_URL, future=True,
                                                          echo=True)
 
 AsyncPostgreSQLScopedSession = async_scoped_session(
@@ -27,8 +27,6 @@ async def initialize_postgres_db(declarative_base: Type[DeclarativeBase]):
     metadata = declarative_base.metadata
 
     async with async_engine.begin() as connection:
-        if settings.RESET_DB:
-            await connection.run_sync(metadata.drop_all)
 
         await connection.run_sync(metadata.create_all)
 
