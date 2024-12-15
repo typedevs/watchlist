@@ -1,4 +1,6 @@
-from ...core.config import settings
+# flake8: noqa
+
+from movie.src.core.config import settings
 
 IS_RELATIONAL_DB = True
 IS_DOCUMENT_DB = False
@@ -11,11 +13,6 @@ if DATABASE_TYPE == 'postgresql':
     from .postgres import initialize_postgres_db as initialize_db
 
     IS_RELATIONAL_DB = True
-
-elif DATABASE_TYPE == 'mongodb':
-    from .mongodb import initialize_mongo_db as initialize_db
-
-    IS_DOCUMENT_DB = True
 
 else:
     raise RuntimeError(
