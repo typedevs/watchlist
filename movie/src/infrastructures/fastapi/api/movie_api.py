@@ -1,6 +1,5 @@
 from typing import List
 
-from dependency_injector.wiring import inject
 from fastapi import APIRouter
 
 from movie.src.adapters.controllers.movie_controller import MovieController
@@ -20,7 +19,6 @@ async def get_movies():
 
 
 @router.get("/{movie_id}", response_model=MovieResponse)
-@inject
 async def get_movie(
     movie_id: int,
 ):
@@ -29,7 +27,6 @@ async def get_movie(
 
 
 @router.post("/", response_model=MovieResponse)
-@inject
 async def create_movie(
     movie: MovieCreateRequest,
 ):
@@ -38,7 +35,6 @@ async def create_movie(
 
 
 @router.delete("/{movie_id}")
-@inject
 async def delete_movie(
     movie_id: int,
 ):
