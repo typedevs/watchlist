@@ -1,18 +1,14 @@
 from asyncio import current_task
 from typing import AsyncGenerator, Type
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_scoped_session,
-    async_sessionmaker,
-    create_async_engine, AsyncEngine,
-)
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_scoped_session, \
+    async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from movie.src.core.config import settings
 
-AsyncPostgreSQLEngine: AsyncEngine = create_async_engine(settings.full_database_url, future=True, echo=True)
-
+AsyncPostgreSQLEngine: AsyncEngine = create_async_engine(settings.full_database_url, future=True,
+                                                         echo=True)
 
 AsyncPostgreSQLScopedSession = async_scoped_session(
     async_sessionmaker(

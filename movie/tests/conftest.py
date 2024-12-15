@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from sqlalchemy import text
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from movie.src.core.config import settings
 from movie.src.infrastructures.database.sql_models.base import Base
@@ -51,7 +51,8 @@ async def test_database_url(event_loop):
 @pytest.fixture(scope="session")
 async def postgres_db(test_database_url):
     """Set up the test database and provide an async engine."""
-    async_engine = create_async_engine(test_database_url, future=True, echo=True, isolation_level="SERIALIZABLE")
+    async_engine = create_async_engine(test_database_url, future=True, echo=True,
+                                       isolation_level="SERIALIZABLE")
     async with async_engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
     yield async_engine

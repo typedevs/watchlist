@@ -1,6 +1,5 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
-
 
 from movie.src.adapters.repositories.base_repository import Repository
 
@@ -22,4 +21,3 @@ class UnitOfWork(Generic[T], ABC):
     async def __aexit__(self, exc_type, exc, tb):
         """Commit or rollback the transaction."""
         raise NotImplementedError
-

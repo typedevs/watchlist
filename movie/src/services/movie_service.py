@@ -7,6 +7,7 @@ from movie.src.services.base_service import Service
 
 
 class MovieService(Service[MovieEntity]):
+
     def __init__(self, movie_uow: UnitOfWork):
         self.movie_uow = movie_uow
 

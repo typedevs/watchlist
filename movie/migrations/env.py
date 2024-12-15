@@ -1,24 +1,21 @@
 import asyncio
-from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-from alembic import context
 import sys
+from logging.config import fileConfig
 from pathlib import Path
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
 from movie.src.core.config import settings
 from movie.src.infrastructures.database.sql_models.base import Base
 
-
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.full_database_url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
 
 target_metadata = Base.metadata
 
@@ -51,8 +48,7 @@ async def run_migrations_online():
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
             future=True,
-        )
-    )
+        ))
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
