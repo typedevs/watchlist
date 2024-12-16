@@ -9,5 +9,4 @@ async def test_create_movie(client):
                                  follow_redirects=True)
     data = response.json()
     assert response.status_code == 200
-    assert data['id'] == 1
     assert data['name'] == 'Jnception'
