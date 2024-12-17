@@ -1,0 +1,11 @@
+makemigrations arg="":
+    bash ./commands/makemigrations.sh {{ arg }}
+
+migrate:
+    bash ./commands/migrate.sh
+
+populatedb:
+    bash ./commands/populate_db.sh
+
+revertmigration arg="":
+    bash ./commands/revert_migration.sh {{ arg }}
