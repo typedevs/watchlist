@@ -1,13 +1,12 @@
 import pytest
 
 
-# @pytest.mark.asyncio
-# async def test_create_movie(integration_test_client):
-#     payload = {"name": "Inception", "director_id": 1}
-#
-#     response = integration_test_client.post("/", json=payload)
-#
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["name"] == "Inception"
-#     assert data["director_id"] == 1
+@pytest.mark.anyio
+@pytest.mark.dependency
+async def test_create_movie(client):
+    movie_data = {"name": "Jnception", "director_id": 1}
+    response = await client.post(url="http://localhost:9001/movie", json=movie_data,
+                                 follow_redirects=True)
+    data = response.json()
+    assert response.status_code == 200
+    assert data['name'] == 'Jnception'

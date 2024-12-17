@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, List
+from typing import Generic, List, TypeVar
 
 T = TypeVar("T")
 
 
 class Service(ABC, Generic[T]):
+
     @abstractmethod
     async def create(self, entity: T) -> T:
         """Create a new entity."""

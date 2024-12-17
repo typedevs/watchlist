@@ -1,24 +1,41 @@
-from fastapi import FastAPI
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from contextlib import asynccontextmanager
 
-from movie.src.core.containers import AppContainer
-from movie.src.infrastructures.fastapi.api.routes import routers
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from opentelemetry import trace
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor, BatchSpanProcessor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-app = FastAPI()
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-container = AppContainer()
-app.container = container
+from movie.src.infrastructures.database import IS_RELATIONAL_DB, initialize_db
+from movie.src.infrastructures.fastapi.api.routes import routers
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    kwargs = {}
+    if IS_RELATIONAL_DB:
+        from movie.src.infrastructures.database.sql_models.base import Base
+        kwargs = {'declarative_base': Base}
+
+    await initialize_db(**kwargs)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(routers)
 
-resource = Resource(attributes={
-    SERVICE_NAME: "fs-app"
-})
+
+@app.exception_handler(Exception)
+async def universal_exception_handler(_, exc):
+    return JSONResponse(content={'error': f'{type(exc).__name__}: {exc}'}, status_code=500)
+
+
+resource = Resource(attributes={SERVICE_NAME: "fs-app"})
 traceProvider = TracerProvider(resource=resource)
 processor = BatchSpanProcessor(ConsoleSpanExporter())
 traceProvider.add_span_processor(processor)

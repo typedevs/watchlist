@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from movie.src.infrastructures.database.models.base import Base
+from movie.src.infrastructures.database.sql_models.base import Base
 
 
 class MovieModel(Base):

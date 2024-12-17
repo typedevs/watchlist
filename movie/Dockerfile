@@ -1,6 +1,10 @@
 FROM python:3.11.4-alpine
 
-WORKDIR /app
+RUN apk add gcc python3-dev musl-dev linux-headers
+
+WORKDIR /app/movie
+
+ENV PYTHONPATH=/app
 
 COPY requirements.txt .
 

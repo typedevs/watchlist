@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Optional
+from typing import TypeVar, List, Optional, Any
 
 T = TypeVar("T")
 
 
-class Repository(ABC, Generic[T]):
+class Repository(ABC):
+    session: Any
+
     @abstractmethod
-    async def add(self, entity: T) -> None:
+    async def add(self, entity: T) -> T:
         """Add a new entity to the repository."""
         pass
 

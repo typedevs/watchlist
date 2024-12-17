@@ -11,11 +11,9 @@ class Settings(BaseSettings):
     DATABASE_HOST: str
     DATABASE_PORT: str
     DATABASE_NAME: str
+    RESET_TEST_DB: bool = True
 
-    @property
-    def full_database_url(self):
-        return (f"{self.DATABASE_URL}://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@"
-                f"{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}")
+    COLLECTION_NAME: str = 'movie'
 
     class Config:
         env_file = ".env"

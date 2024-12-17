@@ -1,75 +1,85 @@
-from asyncio import current_task
+# flake8: noqa
+
+import os
+from unittest.mock import AsyncMock, patch
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, async_scoped_session
+from httpx import AsyncClient
+from pytest import Config
 
-from movie.src.adapters.controllers.movie_controller import MovieController
-from movie.src.core.containers import AppContainer
-from movie.src.infrastructures.database.models.base import Base
-from movie.src.main import app
-
-
-@pytest.fixture
-def mock_movie_controller(mocker):
-    """Mock the MovieController for dependency injection."""
-    return mocker.Mock(spec=MovieController)
+from movie.src.infrastructures.database import IS_RELATIONAL_DB, initialize_db
+from movie.src.infrastructures.database.postgres import AsyncPostgreSQLEngine, \
+    AsyncPostgreSQLScopedSession
 
 
-@pytest.fixture
-def unit_test_client(mock_movie_controller):
-    """Set up the test client with a mocked container."""
-    container = AppContainer()
-    container.movie_controller.override(mock_movie_controller)
-
-    app.container = container
-    with TestClient(app) as unit_test_client:
-        yield unit_test_client
+def pytest_configure(config: Config):
+    echo = print  # ignore: remove-print-statements
+    echo(__file__)
+    echo(f'DATABASE_URL={os.environ["DATABASE_URL"]}')
 
 
-@pytest.fixture(scope="function")
-def test_database_url():
-    """Provide the database URL for the test database."""
-    return "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+@pytest.fixture(scope='session')
+def anyio_backend():
+    yield 'asyncio'
 
 
-@pytest.fixture(scope="function")
-def test_engine(test_database_url):
-    """Create the test engine for database connections."""
-    return create_async_engine(test_database_url, future=True, echo=False)
+@pytest.fixture(scope='session')
+async def client():
+    async with AsyncClient() as ac:
+        yield ac
 
 
-@pytest.fixture(scope="function")
-async def setup_test_database(test_engine):
-    """Create and drop the database schema for tests."""
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+@pytest.fixture(scope='session')
+async def mock_controller():
+    movie_repository = AsyncMock()
+    movie_uow = AsyncMock()
+    movie_uow.__aenter__.return_value = movie_uow
+    movie_uow.repository = movie_repository
+    movie_service = AsyncMock()
+    movie_service.movie_uow = movie_uow
+    controller = AsyncMock()
+    controller.movie_service = movie_service
+
+    yield controller
 
 
-@pytest.fixture
-def test_session_factory(test_engine):
-    """Create a session factory for tests."""
-    async_session = async_scoped_session(
-        async_sessionmaker(
-            bind=test_engine,
-            expire_on_commit=False,
-            autoflush=False,
-            autocommit=False,
-            class_=AsyncSession,
-        ),
-        scopefunc=current_task,
-    )
-    return async_session
+if IS_RELATIONAL_DB:
+    from sqlalchemy import event
+    from sqlalchemy.sql import text
 
+    from movie.src.infrastructures.database.sql_models.base import Base
 
-@pytest.fixture
-def integration_test_client(test_session_factory):
-    container = AppContainer()
-    container.db_session_factory.override(test_session_factory)
+    TEST_DB_NAME = "arian_test"
 
-    app.container = container
-    with TestClient(app) as integration_test_client:
-        yield integration_test_client
+    @pytest.fixture(scope='package', autouse=True)
+    async def engine():
+        await initialize_db(declarative_base=Base)
+
+    @pytest.fixture(scope='function', autouse=True)
+    async def session():
+        async with AsyncPostgreSQLEngine.connect() as conn:
+            await conn.execute(text('BEGIN'))
+            await conn.begin_nested()
+
+            async_session = AsyncPostgreSQLScopedSession(bind=conn)
+
+            @event.listens_for(async_session.sync_session, 'after_transaction_end')
+            def end_savepoint(*args, **kwargs):
+                if conn.closed:
+                    return
+                if not conn.in_nested_transaction():
+                    conn.sync_connection.begin_nested()
+
+            yield async_session
+
+            await AsyncPostgreSQLScopedSession.remove()
+
+    @pytest.fixture(scope='function', autouse=True)
+    def patch_functions(session):
+        with (patch('movie.src.infrastructures.database.postgres.get_async_postgresql_session',
+                    return_value=session),
+              patch(
+                  'movie.src.adapters.unit_of_works.relational_db_unit_of_work.RelationalDBUnitOfWork.remove',
+                  new_callable=AsyncMock),
+              ):
+            yield
