@@ -36,21 +36,15 @@ async def get_watchlist(user_id: int):
             # Call movie microservice to get movie details
             import requests
 
-            response = requests.get(
-                f"http://movie:8001/movie/{watchlist.movie_id}"
-            )
+            response = requests.get(f"http://movie:8001/movie/{watchlist.movie_id}")
             if response.status_code == 200:
                 movie = response.json()
                 # Call director microservice to get director details
-                response = requests.get(
-                    f"http://director:8002/director/{movie['director_id']}"
-                )
+                response = requests.get(f"http://director:8002/director/{movie['director_id']}")
                 if response.status_code == 200:
                     director = response.json()
-                    watchlist_movies.append(
-                        {
-                            "movie_name": movie["name"],
-                            "director_name": director["name"],
-                        }
-                    )
+                    watchlist_movies.append({
+                        "movie_name": movie["name"],
+                        "director_name": director["name"],
+                    })
     return watchlist_movies
